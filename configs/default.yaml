@@ -1,0 +1,36 @@
+maze:
+  size: 10
+  seed: 42
+
+qlearning:
+  alpha: 0.1
+  gamma: 0.99
+  epsilon: 1.0
+  epsilon_decay: 0.995
+  epsilon_min: 0.01
+  n_episodes: 3000
+
+sarsa:
+  alpha: 0.1
+  gamma: 0.99
+  epsilon: 1.0
+  epsilon_decay: 0.995
+  epsilon_min: 0.01
+  n_episodes: 3000
+
+dqn:
+  total_timesteps: 1000000
+  learning_rate: 0.001
+  buffer_size: 50000
+  learning_starts: 5000
+  batch_size: 64
+  gamma: 0.99
+  exploration_fraction: 0.5
+  exploration_final_eps: 0.05
+  tensorboard_log: null
+  model_save_path: "./models/dqn_maze"
+
+visualization:
+  cell_px: 30
+  fps: 10
+  plot_save_dir: "./reports/"
