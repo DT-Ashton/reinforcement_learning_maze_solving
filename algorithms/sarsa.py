@@ -5,6 +5,8 @@ from metrics.training_metrics import TrainingMetrics
 
 
 class SARSAAgent(BaseAgent):
+    ALGO_NAME = "sarsa"
+
     def update(self, s: int, a: int, r: float, s_next: int, done: bool,
                a_next: int = 0) -> None:
         self.q_table[s, a] += self.alpha * (
@@ -14,7 +16,7 @@ class SARSAAgent(BaseAgent):
 
     def train(self, n_episodes: int = 3000) -> TrainingMetrics:
         metrics = TrainingMetrics(
-            algo_name="sarsa",
+            algo_name=self.ALGO_NAME,
             maze_size=self.size,
             n_episodes=n_episodes,
         )

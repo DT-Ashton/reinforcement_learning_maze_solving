@@ -5,6 +5,8 @@ from metrics.training_metrics import TrainingMetrics
 
 
 class QLearningAgent(BaseAgent):
+    ALGO_NAME = "qlearning"
+
     def update(self, s: int, a: int, r: float, s_next: int, done: bool) -> None:
         self.q_table[s, a] += self.alpha * (
             r + self.gamma * np.max(self.q_table[s_next]) * (1 - int(done))
@@ -13,7 +15,7 @@ class QLearningAgent(BaseAgent):
 
     def train(self, n_episodes: int = 3000) -> TrainingMetrics:
         metrics = TrainingMetrics(
-            algo_name="qlearning",
+            algo_name=self.ALGO_NAME,
             maze_size=self.size,
             n_episodes=n_episodes,
         )
