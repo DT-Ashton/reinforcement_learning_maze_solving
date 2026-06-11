@@ -8,13 +8,10 @@ __pycache__/
 # Virtual environments
 .venv/
 venv/
-ENV/
+.env/
 
 .vscode/
 .claude/
 
 logs/
-plans/
 reports/
-
-*.json

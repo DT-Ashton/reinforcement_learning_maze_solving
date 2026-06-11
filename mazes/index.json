@@ -1,0 +1,47 @@
+[
+  {
+    "file": "maze_5x5_seed600.json",
+    "size": 5,
+    "seed": 600
+  },
+  {
+    "file": "maze_5x5_seed601.json",
+    "size": 5,
+    "seed": 601
+  },
+  {
+    "file": "maze_5x5_seed602.json",
+    "size": 5,
+    "seed": 602
+  },
+  {
+    "file": "maze_10x10_seed1100.json",
+    "size": 10,
+    "seed": 1100
+  },
+  {
+    "file": "maze_10x10_seed1101.json",
+    "size": 10,
+    "seed": 1101
+  },
+  {
+    "file": "maze_10x10_seed1102.json",
+    "size": 10,
+    "seed": 1102
+  },
+  {
+    "file": "maze_15x15_seed1600.json",
+    "size": 15,
+    "seed": 1600
+  },
+  {
+    "file": "maze_15x15_seed1601.json",
+    "size": 15,
+    "seed": 1601
+  },
+  {
+    "file": "maze_15x15_seed1602.json",
+    "size": 15,
+    "seed": 1602
+  }
+]
