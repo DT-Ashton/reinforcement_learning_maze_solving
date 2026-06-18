@@ -10,7 +10,7 @@
 - [x] Phase 5: Jupyter Notebook — Analysis + Report
 - [x] Phase 6: Unseen Maze Live Demo (Q-Learning, SARSA, Dyna-Q)
 
-**DQN Removal (2026-06-12):** Phase 3 (DQN via Stable-Baselines3) was implemented, debugged, and working (100% success, 40 steps on 10x10 seed=42), but later removed from the project entirely per user decision — project now compares **Q-Learning, SARSA, and Dyna-Q** only. Removed: `algorithms/dqn_trainer.py`, `--algo dqn` CLI option, `dqn:` config section, `stable-baselines3`/`torch`/`tensorboard` deps, `test_function/phase3_dqn.py`, DQN notebook section, and saved `models/dqn_*` artifacts.
+**DQN Removal (2026-06-12):** Phase 3 (DQN via Stable-Baselines3) was implemented, debugged, and working (100% success, 40 steps on 10x10 seed=42), but later removed from the project entirely per user decision — project now compares **Q-Learning, SARSA, and Dyna-Q** only. Removed: `algorithms/dqn_trainer.py`, `--algo dqn` CLI option, `dqn:` config section, `stable-baselines3`/`torch`/`tensorboard` deps, `tests/phase3_dqn.py`, DQN notebook section, and saved `models/dqn_*` artifacts.
 
 ---
 
@@ -69,9 +69,9 @@ episodes=3000
 
 ## Phase 6 — Key Design Decisions
 
-### Maze Pool Format (`mazes/`)
-- `mazes/maze_{size}x{size}_seed{seed}.json`: `{"size", "seed", "start": [0,0], "goal": [N-1,N-1], "grid": <(2N+1)x(2N+1) int list>}`.
-- `mazes/index.json`: lightweight list of `{"file", "size", "seed"}` for fast picking without loading every grid.
+### Maze Pool Format (`maze_pool/`)
+- `maze_pool/maze_{size}x{size}_seed{seed}.json`: `{"size", "seed", "start": [0,0], "goal": [N-1,N-1], "grid": <(2N+1)x(2N+1) int list>}`.
+- `maze_pool/index.json`: lightweight list of `{"file", "size", "seed"}` for fast picking without loading every grid.
 - Generated via `python -m maze.pool_generator` (default: sizes `[5, 10, 15]`, 3 per size, deterministic seeds `base_seed + size*100 + i`).
 
 ### MazeEnv Preset Grid
@@ -87,7 +87,7 @@ episodes=3000
 - Expected: Dyna-Q(n=10) reaches 90% rolling success rate in ~50-150 episodes vs several hundred-1000 for plain Q-Learning on a 10x10 unseen maze (3-8x fewer episodes).
 
 ### Live Demo (`demo_unseen_maze.py`)
-- Picks a random maze from `mazes/index.json` (or `--maze <path>`), opens pygame, shows static maze (agent@start, goal visible), waits for SPACE.
+- Picks a random maze from `maze_pool/index.json` (or `--maze <path>`), opens pygame, shows static maze (agent@start, goal visible), waits for SPACE.
 - Before training (first algorithm only), `maze_is_solvable()` runs a BFS reachability check from start to goal on `_base_grid`. If unreachable, the demo prints "KHONG THE GIAI DUOC" and exits immediately — avoids wasting `episode_cap` episodes on an unsolvable maze.
 - Runs Q-Learning → SARSA → Dyna-Q sequentially, each fresh (no pretrained weights). Training runs **headless** (`render_mode=None`, console progress every 50 episodes) — at 10 FPS, rendering 100s of episodes took minutes and the agent appeared "frozen" between throttled frames.
 - During headless training, `_show_processing_message()` draws the static maze + "Dang xu ly maze, vui long cho..." once on the existing pygame window so it doesn't look frozen/blank. The text disappears automatically once the final greedy episode starts re-rendering frames.
@@ -139,7 +139,7 @@ Also noted (non-blocking):
 - `demo_unseen_maze.py` waits for SPACE only once (before the first algorithm); Q-Learning → SARSA → Dyna-Q then run back-to-back with fresh `MazeEnv` instances (same maze file) and `env.close()` between each.
 
 ### Next immediate action
-None — Phase 6 complete. Optional follow-ups: regenerate `mazes/` pool with more sizes/seeds if needed, or add `demo_unseen_maze.py` results to the brainstorm report.
+None — Phase 6 complete. Optional follow-ups: regenerate `maze_pool/` pool with more sizes/seeds if needed, or add `demo_unseen_maze.py` results to the brainstorm report.
 
 ---
 

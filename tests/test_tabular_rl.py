@@ -11,7 +11,7 @@ Tests:
   6. Q-Learning vs SARSA: both converge on small maze
 
 Run:
-    python test_function/phase2_tabular_rl.py
+    python tests/test_tabular_rl.py
 """
 
 import sys

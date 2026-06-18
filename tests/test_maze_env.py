@@ -9,8 +9,8 @@ Tests:
   4. Gymnasium check_env validation
 
 Run:
-    python test_function/phase1_maze_env.py
-    python test_function/phase1_maze_env.py --no-render   # headless / no pygame
+    python tests/test_maze_env.py
+    python tests/test_maze_env.py --no-render   # headless / no pygame
 """
 
 import argparse

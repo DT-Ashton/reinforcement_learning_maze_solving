@@ -10,7 +10,7 @@ Tests:
   5. Dyna-Q sample efficiency -- Dyna-Q converges in <= episodes vs Q-Learning
 
 Run:
-    python test_function/phase6_unseen_maze.py
+    python tests/test_unseen_maze_demo.py
 """
 
 import sys
@@ -23,7 +23,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 import numpy as np
 
-_TEST_POOL_DIR = os.path.abspath("./mazes/_test_pool")
+_TEST_POOL_DIR = os.path.abspath("./maze_pool/_test_pool")
 
 
 def _cleanup():

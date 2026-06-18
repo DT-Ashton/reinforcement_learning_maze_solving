@@ -28,11 +28,11 @@ reinforcement_learning_maze_solving/
 ├── visualization/
 │   ├── pygame_renderer.py   # Pygame renderer
 │   └── matplotlib_plots.py  # Reward/success/heatmap plots
-├── mazes/                   # Pool mê cung JSON
-├── test_function/
-│   ├── phase1_maze_env.py   # Tests: maze generator + Gymnasium env
-│   ├── phase2_tabular_rl.py # Tests: Q-Learning + SARSA
-│   └── phase6_unseen_maze.py # Tests: pool generation, Dyna-Q, demo
+├── maze_pool/                # Pool mê cung JSON
+├── tests/
+│   ├── test_maze_env.py      # Tests: maze generator + Gymnasium env
+│   ├── test_tabular_rl.py    # Tests: Q-Learning + SARSA
+│   └── test_unseen_maze_demo.py # Tests: pool generation, Dyna-Q, demo
 └── notebooks/
     └── maze_rl_analysis.ipynb
 ```
@@ -91,7 +91,7 @@ python -m maze.pool_generator --sizes 10 15 20 --n-per-size 5   # tuỳ chỉnh
 ```powershell
 python demo_unseen_maze.py                                          # random 10x10
 python demo_unseen_maze.py --size 15                                # random 15x15
-python demo_unseen_maze.py --maze mazes/maze_10x10_seed1100.json    # maze cụ thể
+python demo_unseen_maze.py --maze maze_pool/maze_10x10_seed1100.json    # maze cụ thể
 python demo_unseen_maze.py --size 20 --episodes 1600                # maze lớn hơn
 ```
 
@@ -122,17 +122,17 @@ jupyter notebook notebooks/maze_rl_analysis.ipynb
 
 Hoặc mở bằng **VS Code** → chọn kernel Python → **Run All**.
 
-8 sections: Maze demo → Env check → Q-Learning → SARSA → Comparison → Q-heatmap → Ablation sizes → Conclusions.  
-Notebook tự train lại từ đầu nếu không tìm thấy file metrics đã lưu.
+Sections: Maze demo → Env check → Q-Learning → SARSA → Dyna-Q → Comparison → Q-heatmap → Ablation sizes → Conclusions.  
+Mỗi lần chạy đều train lại từ đầu (không cache model/metrics).
 
 ---
 
 ## Tests
 
 ```powershell
-python test_function/phase1_maze_env.py    # Maze + Gymnasium env
-python test_function/phase2_tabular_rl.py  # Q-Learning + SARSA
-python test_function/phase6_unseen_maze.py # Pool generation, maze loading, Dyna-Q, demo
+python tests/test_maze_env.py         # Maze + Gymnasium env
+python tests/test_tabular_rl.py       # Q-Learning + SARSA
+python tests/test_unseen_maze_demo.py # Pool generation, maze loading, Dyna-Q, demo
 ```
 
 ---

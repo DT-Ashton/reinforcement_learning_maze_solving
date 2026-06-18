@@ -3,9 +3,9 @@ Live demo: agent gap maze chua tung thay, hoc truc tiep (online).
 So sanh toc do hoi tu giua Q-Learning, SARSA, va Dyna-Q.
 
 Run:
-    python -m maze.pool_generator   # tao mazes/ neu chua co
+    python -m maze.pool_generator   # tao maze_pool/ neu chua co
     python demo_unseen_maze.py
-    python demo_unseen_maze.py --maze mazes/maze_10x10_seed1100.json
+    python demo_unseen_maze.py --maze maze_pool/maze_10x10_seed1100.json
 """
 
 import argparse
@@ -24,11 +24,11 @@ from metrics.training_metrics import TrainingMetrics
 from visualization.pygame_renderer import PygameRenderer
 
 
-def pick_maze_file(mazes_dir: str = "mazes", path: str = None, size: int = 10) -> str:
+def pick_maze_file(maze_pool_dir: str = "maze_pool", path: str = None, size: int = 10) -> str:
     if path is not None:
         return path
 
-    index_path = os.path.join(mazes_dir, "index.json")
+    index_path = os.path.join(maze_pool_dir, "index.json")
     if not os.path.exists(index_path):
         raise FileNotFoundError(
             f"Khong tim thay {index_path}. "
@@ -40,7 +40,7 @@ def pick_maze_file(mazes_dir: str = "mazes", path: str = None, size: int = 10) -
 
     candidates = [e for e in index if e["size"] == size] or index
     entry = random.choice(candidates)
-    return os.path.join(mazes_dir, os.path.basename(entry["file"]))
+    return os.path.join(maze_pool_dir, os.path.basename(entry["file"]))
 
 
 def maze_is_solvable(env) -> bool:
@@ -239,7 +239,7 @@ def main() -> None:
         description="Live demo: Q-Learning vs SARSA vs Dyna-Q tren maze chua tung thay"
     )
     parser.add_argument("--maze", type=str, default=None,
-                        help="Path toi 1 file maze JSON (mac dinh: random 10x10 tu mazes/)")
+                        help="Path toi 1 file maze JSON (mac dinh: random 10x10 tu maze_pool/)")
     parser.add_argument("--size", type=int, default=10,
                         help="Kich thuoc maze de pick neu khong dung --maze")
     parser.add_argument("--episodes", type=int, default=None,

@@ -6,7 +6,7 @@ from maze.generator import MazeGenerator
 
 
 def generate_pool(sizes: list = None, n_per_size: int = 3,
-                   base_seed: int = 100, out_dir: str = "mazes") -> list:
+                   base_seed: int = 100, out_dir: str = "maze_pool") -> list:
     if sizes is None:
         sizes = [5, 10, 15]
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     parser.add_argument("--sizes", type=int, nargs="+", default=[5, 10, 15])
     parser.add_argument("--n-per-size", type=int, default=3)
     parser.add_argument("--base-seed", type=int, default=100)
-    parser.add_argument("--out-dir", type=str, default="mazes")
+    parser.add_argument("--out-dir", type=str, default="maze_pool")
     args = parser.parse_args()
 
     files = generate_pool(args.sizes, args.n_per_size, args.base_seed, args.out_dir)

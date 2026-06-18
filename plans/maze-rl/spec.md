@@ -35,7 +35,7 @@
   Accepted when: `python main.py --plot` tạo ra reward curve, success rate, và Q-value heatmap.
 
 - **[P2]** As a student, I want to see Q-Learning, SARSA, and Dyna-Q learn live on a maze never used during development, so I can visually compare convergence speed.
-  Accepted when: `python demo_unseen_maze.py` mở pygame hiển thị 1 maze từ `mazes/`, chờ SPACE, sau đó train trực tiếp (không dùng model pretrained) cả 3 thuật toán trên maze đó và in ra bảng so sánh episodes-to-converge + final path length.
+  Accepted when: `python demo_unseen_maze.py` mở pygame hiển thị 1 maze từ `maze_pool/`, chờ SPACE, sau đó train trực tiếp (không dùng model pretrained) cả 3 thuật toán trên maze đó và in ra bảng so sánh episodes-to-converge + final path length.
 
 - **[P3]** PPO agent — out of scope, có thể thêm sau khi 3 phase chính xong.
 
@@ -72,10 +72,10 @@
 
 ### Phase 6 — Unseen Maze Live Demo
 
-16. **FR-16**: `maze/pool_generator.py::generate_pool(sizes, n_per_size, base_seed, out_dir)` tạo nhiều maze ngẫu nhiên kích thước khác nhau, lưu mỗi maze thành 1 file JSON (`size`, `seed`, `start`, `goal`, `grid`) trong `mazes/`, kèm `mazes/index.json` liệt kê tất cả file.
+16. **FR-16**: `maze/pool_generator.py::generate_pool(sizes, n_per_size, base_seed, out_dir)` tạo nhiều maze ngẫu nhiên kích thước khác nhau, lưu mỗi maze thành 1 file JSON (`size`, `seed`, `start`, `goal`, `grid`) trong `maze_pool/`, kèm `maze_pool/index.json` liệt kê tất cả file.
 17. **FR-17**: `MazeEnv(size, seed, render_mode, grid=None)` nhận thêm `grid` để load maze có sẵn thay vì tự generate; `env/maze_loader.py::load_maze_env(path, render_mode)` đọc 1 file pool và trả về `MazeEnv` tương ứng. `reset()` không regenerate khi `_preset_grid=True`.
 18. **FR-18**: `algorithms/dyna_q.py::DynaQAgent(QLearningAgent)` — thêm model `dict[(s,a) -> (r, s_next, done)]` và `planning_steps` (default 10); mỗi `update()` thật chạy thêm `planning_steps` update mô phỏng từ model. `train()` kế thừa từ `QLearningAgent`, báo cáo `algo_name="dyna_q"`.
-19. **FR-19**: `demo_unseen_maze.py` — pick maze từ `mazes/`, hiện pygame tĩnh (agent@start, goal hiển thị) + text "Press SPACE to start", chờ SPACE rồi train live (không pretrained) Q-Learning → SARSA → Dyna-Q tuần tự trên cùng maze, có render throttling. DQN không tham gia demo này.
+19. **FR-19**: `demo_unseen_maze.py` — pick maze từ `maze_pool/`, hiện pygame tĩnh (agent@start, goal hiển thị) + text "Press SPACE to start", chờ SPACE rồi train live (không pretrained) Q-Learning → SARSA → Dyna-Q tuần tự trên cùng maze, có render throttling. DQN không tham gia demo này.
 20. **FR-20**: Mỗi thuật toán dừng sớm khi rolling success rate ≥ 90% (cap 1500 episodes), sau đó chạy 1 episode greedy (rendered) để show đường đi cuối. In bảng so sánh: episodes-to-converge + final path length cho 3 thuật toán.
 
 ### Entry Point
@@ -106,7 +106,7 @@
 - [ ] DQN train được 100k steps không crash, reward curve hiển thị trong TensorBoard
 - [ ] Pygame demo chạy được ở tốc độ ≥ 10 FPS
 - [ ] `--plot` tạo ra ít nhất 3 plots: reward curve, success rate, Q-value heatmap
-- [ ] `python -m maze.pool_generator` tạo `mazes/index.json` + các file maze JSON
+- [ ] `python -m maze.pool_generator` tạo `maze_pool/index.json` + các file maze JSON
 - [ ] Trên 1 maze unseen (5x5/10x10), Dyna-Q(n=10) đạt rolling success rate ≥ 90% với số episodes ít hơn Q-Learning thuần
 - [ ] `python demo_unseen_maze.py` chạy được: hiện maze tĩnh → SPACE → train live 3 thuật toán → in bảng so sánh
 
