@@ -7,11 +7,16 @@ __pycache__/
 
 # Virtual environments
 .venv/
-venv/
 .env/
 
 .vscode/
 .claude/
 
 logs/
-reports/
+/reports/
+
+# leftover debug scripts
+ql_eval.py
+
+.ck.json
+.mcp.json

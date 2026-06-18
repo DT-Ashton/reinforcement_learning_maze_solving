@@ -43,5 +43,25 @@
     "file": "maze_15x15_seed1602.json",
     "size": 15,
     "seed": 1602
+  },
+  {
+    "file": "maze_15x15_seed1700_loops.json",
+    "size": 15,
+    "seed": 1700
+  },
+  {
+    "file": "maze_15x15_seed1701_uniqueshortest.json",
+    "size": 15,
+    "seed": 1701
+  },
+  {
+    "file": "maze_15x15_seed1702_uniqueshortest.json",
+    "size": 15,
+    "seed": 1702
+  },
+  {
+    "file": "maze_10x10_seed1800_blockedgoal.json",
+    "size": 10,
+    "seed": 1800
   }
 ]

@@ -11,12 +11,24 @@ def generate_pool(sizes: list = None, n_per_size: int = 3,
         sizes = [5, 10, 15]
 
     os.makedirs(out_dir, exist_ok=True)
-    written = []
+
+    index_path = os.path.join(out_dir, "index.json")
     index = []
+    used_seeds = set()
+    if os.path.exists(index_path):
+        with open(index_path, "r", encoding="utf-8") as f:
+            index = json.load(f)
+        used_seeds = {entry["seed"] for entry in index}
+
+    written = []
 
     for size in sizes:
         for i in range(n_per_size):
             seed = base_seed + size * 100 + i
+            while seed in used_seeds:
+                seed += 1
+            used_seeds.add(seed)
+
             grid = MazeGenerator(size, seed).generate()
 
             filename = f"maze_{size}x{size}_seed{seed}.json"
@@ -34,7 +46,7 @@ def generate_pool(sizes: list = None, n_per_size: int = 3,
             written.append(path)
             index.append({"file": filename, "size": size, "seed": seed})
 
-    with open(os.path.join(out_dir, "index.json"), "w", encoding="utf-8") as f:
+    with open(index_path, "w", encoding="utf-8") as f:
         json.dump(index, f, indent=2)
 
     return written
