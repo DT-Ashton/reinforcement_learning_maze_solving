@@ -242,10 +242,19 @@ def main() -> None:
                         help="Path toi 1 file maze JSON (mac dinh: random 10x10 tu mazes/)")
     parser.add_argument("--size", type=int, default=10,
                         help="Kich thuoc maze de pick neu khong dung --maze")
+    parser.add_argument("--episodes", type=int, default=None,
+                        help="So episode toi da khi train (mac dinh: 1000 voi size<=15, tu dong tang voi size lon hon)")
     args = parser.parse_args()
 
     path = pick_maze_file(path=args.maze, size=args.size)
     print(f"Maze: {path}")
+
+    if args.episodes is not None:
+        episode_cap = args.episodes
+    else:
+        # auto-scale: 1000 cho size<=15, tang theo N^2 voi size lon hon
+        episode_cap = max(1000, args.size * args.size * 4)
+    print(f"episode_cap={episode_cap}")
 
     algos = [
         ("Q-Learning", QLearningAgent),
@@ -267,7 +276,7 @@ def main() -> None:
             wait_for_space(env)
 
         print(f"\n=== {label} ===")
-        metrics, eps_to_converge, path_len = run_live(agent_cls, env)
+        metrics, eps_to_converge, path_len = run_live(agent_cls, env, episode_cap=episode_cap)
         results.append((label, eps_to_converge, path_len, metrics.n_episodes))
 
         conv_str = str(eps_to_converge) if eps_to_converge is not None \
