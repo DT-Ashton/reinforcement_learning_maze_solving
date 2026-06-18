@@ -5,10 +5,12 @@
 ## Phases
 - [x] Phase 1: Maze Generation + Environment
 - [x] Phase 2: Tabular RL (Q-Learning + SARSA)
-- [x] Phase 3: Deep RL (DQN via SB3)
+- [x] ~~Phase 3: Deep RL (DQN via SB3)~~ — removed (2026-06-12), see "DQN Removal" note
 - [x] Phase 4: Visualization + CLI
 - [x] Phase 5: Jupyter Notebook — Analysis + Report
 - [x] Phase 6: Unseen Maze Live Demo (Q-Learning, SARSA, Dyna-Q)
+
+**DQN Removal (2026-06-12):** Phase 3 (DQN via Stable-Baselines3) was implemented, debugged, and working (100% success, 40 steps on 10x10 seed=42), but later removed from the project entirely per user decision — project now compares **Q-Learning, SARSA, and Dyna-Q** only. Removed: `algorithms/dqn_trainer.py`, `--algo dqn` CLI option, `dqn:` config section, `stable-baselines3`/`torch`/`tensorboard` deps, `test_function/phase3_dqn.py`, DQN notebook section, and saved `models/dqn_*` artifacts.
 
 ---
 
@@ -26,9 +28,8 @@ The maze is stored as a **(2N+1) x (2N+1) numpy array** where N is the logical g
 
 ### Observation Space
 `observation_space = Box(0, 3, shape=((2*size+1)*(2*size+1),), dtype=np.float32)`
-(Updated from int32 → float32 per reviewer: SB3 MlpPolicy requires float observations)
 
-The observation is the flattened (2N+1)x(2N+1) grid with agent and goal positions embedded directly in the array. This single representation works for both tabular agents (who extract position from it) and SB3 DQN (which feeds the flat vector to MlpPolicy).
+The observation is the flattened (2N+1)x(2N+1) grid with agent and goal positions embedded directly in the array. Tabular agents extract the agent's position from it.
 
 ### Tabular State Encoding
 Q-Learning and SARSA operate on integer states in range `[0, N*N - 1]`.
@@ -64,17 +65,6 @@ alpha=0.1, gamma=0.99, epsilon=1.0, epsilon_decay=0.995, epsilon_min=0.01
 episodes=3000
 ```
 
-**SB3 DQN defaults (updated after debugging session 2026-06-05):**
-```
-policy="MlpPolicy", learning_rate=1e-3, buffer_size=50000,
-learning_starts=5000, batch_size=64, gamma=0.99,
-exploration_fraction=0.5, exploration_final_eps=0.05,
-total_timesteps=1_000_000
-```
-Observation wrapper `_PosObsWrapper`: 6-dim obs `[ar/N, ac/N, can_N, can_S, can_W, can_E]`.
-Episode budget: `dqn_max_steps = N*N*100` (10000 for N=10).
-See `phase-03-dqn.md` → "DQN Debugging History" for full iteration log.
-
 ---
 
 ## Phase 6 — Key Design Decisions
@@ -98,16 +88,25 @@ See `phase-03-dqn.md` → "DQN Debugging History" for full iteration log.
 
 ### Live Demo (`demo_unseen_maze.py`)
 - Picks a random maze from `mazes/index.json` (or `--maze <path>`), opens pygame, shows static maze (agent@start, goal visible), waits for SPACE.
-- Runs Q-Learning → SARSA → Dyna-Q sequentially, each fresh (no pretrained weights), with **render throttling** (full render for first 50 episodes, then every Nth) so live training doesn't take forever at 10 FPS.
-- Early-stops each algorithm at 90% rolling success rate (cap 1500 episodes), then does one greedy rollout (rendered) to show the final path.
+- Before training (first algorithm only), `maze_is_solvable()` runs a BFS reachability check from start to goal on `_base_grid`. If unreachable, the demo prints "KHONG THE GIAI DUOC" and exits immediately — avoids wasting `episode_cap` episodes on an unsolvable maze.
+- Runs Q-Learning → SARSA → Dyna-Q sequentially, each fresh (no pretrained weights). Training runs **headless** (`render_mode=None`, console progress every 50 episodes) — at 10 FPS, rendering 100s of episodes took minutes and the agent appeared "frozen" between throttled frames.
+- During headless training, `_show_processing_message()` draws the static maze + "Dang xu ly maze, vui long cho..." once on the existing pygame window so it doesn't look frozen/blank. The text disappears automatically once the final greedy episode starts re-rendering frames.
+- Early-stops each algorithm once rolling success rate ≥ 90% **and** a verification greedy rollout actually reaches the goal (`_greedy_reaches_goal`) — cap 1000 episodes. If `episode_cap` is reached without converging, prints "Khong hoi tu sau N episodes..." and still animates the current (best-effort) policy.
+- Then animates one greedy rollout (rendered, 10 FPS) to show the final path.
 - Prints comparison table: episodes-to-converge + final path length per algorithm.
-- DQN excluded from this demo (17 min retrain too slow for live SPACE-to-start) — existing seed=42 DQN demo unchanged.
 
 **Reviewer fixes (Phase 6):**
 - `env.close()` before re-creating `MazeEnv` between algorithms in `demo_unseen_maze.py` (avoid leaking pygame windows).
-- `pygame.event.pump()` once per episode even when `render_mode=None` (avoid OS "Not Responding" during long non-rendered stretches).
-- Default live demo to a **5x5 maze** + `render_every=100` to keep wall-clock under a few minutes (1500-episode cap with rendering on 10x10+ could take >1 hour otherwise).
+- `pygame.event.pump()` once per episode during headless training (avoid OS "Not Responding" during long non-rendered stretches).
+- Default live demo to a **10x10 maze**, `episode_cap=1000`.
 - Demo's manual episode loop must mirror `q_learning.py`/`sarsa.py` exactly, especially `done=terminated` (not `terminated or truncated`).
+
+**Post-release fix (2026-06-12):** 90% rolling success rate during epsilon-greedy training (epsilon still ~0.5 around episode 100-150) does NOT guarantee the **greedy** policy solves the maze — it could oscillate in a 2-cycle near start and time out (`final_path_length == max_steps`). Fixed by adding `_greedy_reaches_goal()`: a no-render greedy rollout checked before declaring convergence; if it fails, training continues. Also switched training from render-throttled (10 FPS, render_every=200) to fully headless with console progress prints — the throttled approach made the demo take minutes and look stuck on a frozen frame.
+
+**Post-release fix 2 (2026-06-12):** Two follow-up UX issues from user testing:
+1. Goal completely walled off (unreachable) → headless training would burn through `episode_cap` for nothing while the window sat frozen. Fixed with `maze_is_solvable()` (BFS reachability pre-check) — aborts the demo with a clear message before training starts.
+2. If the maze is reachable but doesn't converge within `episode_cap`, the window also looked frozen with no feedback. Fixed by printing "Khong hoi tu sau N episodes..." and still animating the best-effort greedy policy.
+3. Even on the normal/solvable path, the window appeared blank/frozen during the entire headless training phase (could be many seconds). Fixed with `_show_processing_message()` — draws the static maze plus a "Dang xu ly maze, vui long cho..." overlay once before headless training starts; the overlay disappears automatically when the final greedy animation begins re-rendering frames.
 
 See `phase-06-unseen-maze-demo.md` for full file-by-file implementation spec.
 
@@ -118,7 +117,7 @@ See `phase-06-unseen-maze-demo.md` for full file-by-file implementation spec.
 4 ACCEPTED findings corrected before implementation:
 1. **Phase 1 — reset() maze regeneration**: Only regenerate maze when `seed` changes or on first call. Subsequent resets restore agent to start. (Without fix: tabular agents learn across different MDPs, never converge.)
 2. **Phase 2 — done flag**: Pass `done = terminated` (not `terminated or truncated`) to Q-update. Truncation is not terminal — bootstrapping should continue. (Without fix: value estimates biased near timeout boundary, success rate below 80%/75%.)
-3. **Phase 3 — observation dtype**: Changed `np.int32` → `np.float32`. SB3 MlpPolicy requires float observations; int32 causes dtype errors/warnings. (Without fix: DQN training may crash or warn on specific SB3+PyTorch versions.)
+3. ~~**Phase 3 — observation dtype**: Changed `np.int32` → `np.float32`. SB3 MlpPolicy requires float observations.~~ (Phase 3/DQN later removed entirely — see "DQN Removal" note above; float32 retained as it's harmless for tabular agents.)
 4. **Phase 4 — demo Q-table assignment**: Must explicitly `agent.q_table = np.load(...)` after creating agent. (Without fix: demo always takes action 0 — bounces off top wall forever.)
 
 Also noted (non-blocking):
@@ -144,39 +143,14 @@ None — Phase 6 complete. Optional follow-ups: regenerate `mazes/` pool with mo
 
 ---
 
-## Previous Session Notes (Phase 3 DQN debugging, 2026-06-05)
+## Previous Session Notes (Phase 3 DQN debugging, 2026-06-05 — historical, DQN later removed)
 
-**Last active:** 2026-06-05
-**Status:** ALL PHASES COMPLETE. DQN debugging in progress (retrain with 6-dim obs).
-
-### DQN Debugging Summary (2026-06-05)
-4 iterations to fix DQN on 10×10 maze. Full details in `phase-03-dqn.md`.
-
-| Iteration | Change | Result |
-|---|---|---|
-| 1 | Raw 441-dim obs, 100k steps | 0% — obs too sparse |
-| 2 | 4-dim position obs + shaping, 300k steps | 0% — hitting time O(N^4) > budget |
-| 3 | size=5 (5×5 maze), 300k steps | PASS — 14 steps, Success |
-| 4 | 10×10, extended budget (1M steps), 4-dim | 0% EVAL — deterministic policy cycles (no wall info) |
-| 5 | 6-dim obs [pos+wall_flags], 1M steps | **100% success, 40 steps** |
-| 6 | 8-dim obs [pos+wall_flags+goal_dir], 1M steps | **100% success, 40 steps** (same — 40 IS optimal path) |
-
-**Final result:** 40 steps = optimal path length in DFS maze seed=42. All 3 algorithms (Q-Learning, SARSA, DQN) achieve optimal. DQN requires ~1000× more compute (1M steps vs 3000 episodes).
-
-### Key Decisions
-- `_PosObsWrapper` observation changed from 4-dim to 6-dim (adds local wall flags per direction)
-- Episode budget: `N*N*100` (not `N*N*10`) to allow O(N^4) random walk to find goal
-- Hook warnings about `Kỳ` path encoding are false positives — files exist and pass all checks
-
-### Next action after training completes
-Run eval on 10×10: `python dqn_eval.py` → expect >70% success rate with 6-dim obs.
+DQN was implemented (SB3, 8-dim `_PosObsWrapper` obs with wall flags + goal direction) and after 6 debugging iterations achieved 100% success at the optimal 40-step path on the 10x10 seed=42 maze, at ~1000x the compute cost of tabular methods (1M timesteps vs 3000 episodes). DQN was subsequently removed from the project on 2026-06-12 — see "DQN Removal" note at the top of this file.
 
 ---
 
 ## Risks
 
-1. **Gymnasium API mismatch with SB3**: SB3 2.x requires strict Gymnasium (not Gym) semantics — 5-tuple `step()` return and proper `reset()` signature. Calling `super().reset(seed=seed)` is mandatory. SB3 does NOT auto-call `check_env()` — run it manually before training.
+1. **Tabular scalability ceiling**: Q-table is `N*N x 4` numpy array. At N=10 this is 400 floats — trivial. But the observation space passed to tabular agents is the full `(2N+1)^2`-length vector; state extraction logic must be correct or the agent will see phantom states and never converge. Any off-by-one in the `gr // 2` conversion corrupts every Q-update.
 
-2. **Tabular scalability ceiling**: Q-table is `N*N x 4` numpy array. At N=10 this is 400 floats — trivial. But the observation space passed to tabular agents is the full `(2N+1)^2`-length vector; state extraction logic must be correct or the agent will see phantom states and never converge. Any off-by-one in the `gr // 2` conversion corrupts every Q-update.
-
-3. **Pygame import on headless systems**: If `import pygame` is called unconditionally at module level in `maze_env.py`, importing the environment in training scripts on servers without a display will crash. All pygame imports and `pygame.init()` calls must be deferred inside the `render_mode == "human"` branch (or lazy-imported inside `render()`).
+2. **Pygame import on headless systems**: If `import pygame` is called unconditionally at module level in `maze_env.py`, importing the environment in training scripts on servers without a display will crash. All pygame imports and `pygame.init()` calls must be deferred inside the `render_mode == "human"` branch (or lazy-imported inside `render()`).

@@ -8,7 +8,6 @@ import yaml
 from env.maze_env import MazeEnv
 from algorithms.q_learning import QLearningAgent
 from algorithms.sarsa import SARSAAgent
-from algorithms.dqn_trainer import DQNTrainer
 from visualization.matplotlib_plots import comparison_plot
 
 
@@ -46,21 +45,6 @@ def run_train(args, cfg: dict) -> None:
         with open("./models/sarsa_metrics.pkl", "wb") as f:
             pickle.dump(metrics, f)
 
-    elif args.algo == "dqn":
-        tb_log = cfg["dqn"].get("tensorboard_log") or None
-        trainer = DQNTrainer(
-            environment,
-            total_timesteps=cfg["dqn"]["total_timesteps"],
-            tensorboard_log=tb_log,
-        )
-        trainer.build_model(**{k: cfg["dqn"][k] for k in [
-            "learning_rate", "buffer_size", "learning_starts",
-            "batch_size", "gamma", "exploration_fraction", "exploration_final_eps",
-        ]})
-        dqn_metrics = trainer.train()
-        with open("./models/dqn_metrics.pkl", "wb") as f:
-            pickle.dump(dqn_metrics, f)
-
 
 def run_demo(args, cfg: dict) -> None:
     import pygame
@@ -95,32 +79,11 @@ def run_demo(args, cfg: dict) -> None:
               f"{'Success' if terminated else 'Timeout'}")
         environment.close()
 
-    elif args.algo == "dqn":
-        model_path = cfg["dqn"]["model_save_path"]
-        if not os.path.exists(model_path + ".zip"):
-            print(f"No saved DQN model at {model_path}.zip. Run --train first.")
-            return
-        trainer = DQNTrainer(environment)
-        trainer.load(model_path)
-
-        obs, _ = environment.reset()
-        terminated, truncated = False, False
-        while not (terminated or truncated):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    environment.close()
-                    return
-            action = trainer.predict(obs)
-            obs, _, terminated, truncated, _ = environment.step(action)
-        print(f"Steps: {environment._step_count}, "
-              f"{'Success' if terminated else 'Timeout'}")
-        environment.close()
-
 
 def run_plot(args, cfg: dict) -> None:
     os.makedirs("./reports/", exist_ok=True)
     metrics_list = []
-    for algo in ["qlearning", "sarsa", "dqn"]:
+    for algo in ["qlearning", "sarsa"]:
         path = f"./models/{algo}_metrics.pkl"
         if os.path.exists(path):
             with open(path, "rb") as f:
@@ -136,7 +99,7 @@ def main() -> None:
     parser.add_argument("--train", action="store_true")
     parser.add_argument("--demo", action="store_true")
     parser.add_argument("--plot", action="store_true")
-    parser.add_argument("--algo", choices=["qlearning", "sarsa", "dqn"],
+    parser.add_argument("--algo", choices=["qlearning", "sarsa"],
                         default="qlearning")
     parser.add_argument("--size", type=int, default=10)
     parser.add_argument("--seed", type=int, default=42)
