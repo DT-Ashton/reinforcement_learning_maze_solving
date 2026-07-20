@@ -58,5 +58,35 @@
     "file": "maze_10x10_seed1800_blockedgoal.json",
     "size": 10,
     "seed": 1800
+  },
+  {
+    "file": "maze_10x10_seed1103.json",
+    "size": 10,
+    "seed": 1103
+  },
+  {
+    "file": "maze_10x10_seed1104.json",
+    "size": 10,
+    "seed": 1104
+  },
+  {
+    "file": "maze_10x10_seed1105.json",
+    "size": 10,
+    "seed": 1105
+  },
+  {
+    "file": "maze_10x10_seed1106.json",
+    "size": 10,
+    "seed": 1106
+  },
+  {
+    "file": "maze_10x10_seed1107.json",
+    "size": 10,
+    "seed": 1107
+  },
+  {
+    "file": "maze_10x10_seed1108.json",
+    "size": 10,
+    "seed": 1108
   }
 ]

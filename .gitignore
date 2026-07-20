@@ -17,6 +17,25 @@ logs/
 
 # Jupyter
 notebooks/.ipynb_checkpoints/
+notebooks/*_executed.ipynb
+
+# Generated comparison outputs (reproducible by running run_comparison.py)
+comparison/results/
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.bbl
+*.blg
+*.pdf
+
+# Internal planning notes
+plans/reports/
 
 # leftover debug scripts
 ql_eval.py
