@@ -1,97 +1,157 @@
-# Maze Solving using Reinforcement Learning
+# Maze Solving with Reinforcement Learning
 
-A reinforcement learning project focused on solving randomly generated mazes using multiple RL algorithms, including Q-Learning, SARSA, and Deep Q-Network (DQN).
-
-The project aims to compare the performance, learning efficiency, and navigation behavior of different reinforcement learning approaches in dynamic maze environments.
-
----
-
-## Project Objectives
-
-This project aims to:
-
-- Generate random mazes with adjustable complexity
-- Design a custom reinforcement learning environment
-- Implement and compare multiple RL algorithms:
-  - Q-Learning
-  - SARSA
-  - Deep Q-Network (DQN)
-  - PPO (optional extension)
-- Visualize agent learning behavior and evaluation metrics
-- Analyze algorithm performance under different maze configurations
+So sánh Q-Learning, SARSA và Dyna-Q trên môi trường mê cung sinh ngẫu nhiên.  
+Đồ án môn Trí tuệ nhân tạo — Kỳ 8.
 
 ---
 
-## Features
+## Cấu trúc dự án
 
-### Maze System
-- Random maze generation
-- Adjustable maze size
-- Configurable random seed
-- Multiple difficulty levels
-
-### Reinforcement Learning Algorithms
-- Q-Learning
-- SARSA
-- Deep Q-Network (DQN)
-- PPO (optional)
-
-### Visualization
-- Real-time maze rendering
-- Agent movement animation
-- Training visualization
-- Replay mode
-- Heatmaps and policy visualization
-
-### Evaluation & Metrics
-- Episode rewards
-- Success rate
-- Average steps to goal
-- Training convergence
-- Path optimality
-- Algorithm comparison dashboard
-
----
-
-## Tech Stack
-
-### Programming Language
-- Python 3.x
-
-### Reinforcement Learning & Environment
-- Gymnasium
-- NumPy
-- PyTorch
-- Stable-Baselines3 (for DQN/PPO)
-
-### Visualization
-- Pygame
-- Matplotlib
-- TensorBoard
-
-### Utilities
-- Pandas
-- Seaborn (optional)
-- Jupyter Notebook
+```
+reinforcement_learning_maze_solving/
+├── demo_unseen_maze.py      # Entry point chính — live demo
+├── requirements.txt
+├── env/
+│   ├── __init__.py          # Đăng ký MazeEnv-v0 với Gymnasium
+│   ├── maze_env.py          # Gymnasium environment
+│   └── maze_loader.py       # Load maze từ file JSON
+├── maze/
+│   ├── generator.py         # Recursive Backtracker DFS
+│   └── pool_generator.py    # Sinh pool mê cung ngẫu nhiên
+├── algorithms/
+│   ├── base_agent.py        # Abstract base class
+│   ├── q_learning.py        # Q-Learning (off-policy)
+│   ├── sarsa.py             # SARSA (on-policy)
+│   └── dyna_q.py            # Dyna-Q (model-based Q-Learning)
+├── metrics/
+│   └── training_metrics.py  # TrainingMetrics dataclass
+├── visualization/
+│   ├── pygame_renderer.py   # Pygame renderer
+│   └── matplotlib_plots.py  # Reward/success/heatmap plots
+├── maze_pool/                # Pool mê cung JSON
+├── tests/
+│   ├── test_maze_env.py      # Tests: maze generator + Gymnasium env
+│   ├── test_tabular_rl.py    # Tests: Q-Learning + SARSA
+│   └── test_unseen_maze_demo.py # Tests: pool generation, Dyna-Q, demo
+└── notebooks/
+    └── maze_rl_analysis.ipynb
+```
 
 ---
 
-## Project Structure
+## Yêu cầu
 
-```text
-reinforcement_learning_maze_solving
-│
-├── env/                  # Maze environment
-├── algorithms/           # RL algorithms
-│   ├── q_learning/
-│   ├── sarsa/
-│   └── dqn/
-│
-├── maze/                 # Maze generation logic
-├── visualization/        # Rendering and visualization
-├── metrics/              # Evaluation metrics
-├── experiments/          # Experiment scripts
-├── configs/              # Configuration files
-├── notebooks/            # Research notebooks
-├── assets/               # Images/videos
-└── main.py
+- Python 3.10+
+- Anaconda (khuyến nghị) hoặc virtualenv
+
+---
+
+## Cài đặt
+
+```powershell
+cd "c:\Users\ADMIN\Documents\Kỳ 8 - AI\reinforcement_learning_maze_solving"
+pip install -r requirements.txt --no-cache-dir
+```
+
+**Packages chính:**
+
+| Package | Phiên bản | Dùng cho |
+|---------|-----------|----------|
+| `gymnasium` | >=0.29 | RL environment API |
+| `numpy` | >=1.24 | Maze generation, Q-table |
+| `pygame` | >=2.5 | Pygame rendering |
+| `matplotlib` | >=3.7 | Plots |
+
+---
+
+## Kiểm tra môi trường
+
+```powershell
+python -c "
+import env, gymnasium
+from gymnasium.utils.env_checker import check_env
+check_env(gymnasium.make('MazeEnv-v0').unwrapped)
+print('Moi truong hop le.')
+"
+```
+
+---
+
+## Demo live (entry point chính)
+
+### Sinh pool mê cung (chạy 1 lần)
+
+```powershell
+python -m maze.pool_generator
+python -m maze.pool_generator --sizes 10 15 20 --n-per-size 5   # tuỳ chỉnh
+```
+
+### Chạy demo
+
+```powershell
+python demo_unseen_maze.py                                          # random 10x10
+python demo_unseen_maze.py --size 15                                # random 15x15
+python demo_unseen_maze.py --maze maze_pool/maze_10x10_seed1100.json    # maze cụ thể
+python demo_unseen_maze.py --size 20 --episodes 1600                # maze lớn hơn
+```
+
+**Luồng:** mở Pygame → xem maze tĩnh → **SPACE** bắt đầu → train headless (console progress) → animate greedy → in bảng so sánh. Nhấn **ESC** để thoát.
+
+**3 thuật toán so sánh:** Q-Learning → SARSA → Dyna-Q (mỗi cái train từ đầu, không dùng pretrained).
+
+**Xử lý maze đặc biệt:**
+- Maze không có đường đi → báo "KHONG THE GIAI DUOC", dừng ngay
+- Không hội tụ trong `episode_cap` → báo "Khong hoi tu sau N episodes", animate policy hiện tại
+
+---
+
+## Dyna-Q — Model-based Q-Learning
+
+`algorithms/dyna_q.py` cung cấp `DynaQAgent`:
+- Kế thừa `QLearningAgent`, thêm internal model `dict[(s,a) -> (r, s_next, done)]`.
+- Mỗi real transition, chạy thêm `planning_steps=10` mô phỏng TD updates — không cần thêm real interaction.
+- **Kết quả:** hội tụ ~17% nhanh hơn Q-Learning thuần (112 vs 138 episodes trung bình trên 10×10).
+
+---
+
+## Jupyter Notebook (báo cáo)
+
+```powershell
+jupyter notebook notebooks/maze_rl_analysis.ipynb
+```
+
+Hoặc mở bằng **VS Code** → chọn kernel Python → **Run All**.
+
+Sections: Maze demo → Env check → Q-Learning → SARSA → Dyna-Q → Comparison → Q-heatmap → Ablation sizes → Conclusions.  
+Mỗi lần chạy đều train lại từ đầu (không cache model/metrics).
+
+---
+
+## Tests
+
+```powershell
+python tests/test_maze_env.py         # Maze + Gymnasium env
+python tests/test_tabular_rl.py       # Q-Learning + SARSA
+python tests/test_unseen_maze_demo.py # Pool generation, maze loading, Dyna-Q, demo
+```
+
+---
+
+## Kết quả (10×10 unseen maze)
+
+| Thuật toán | Episodes hội tụ (TB) | Path length | Ghi chú |
+|------------|---------------------|-------------|---------|
+| Q-Learning | ~138 | optimal | Off-policy |
+| SARSA | ~160 | optimal | On-policy, conservative hơn |
+| Dyna-Q | ~112 | optimal | Model-based, ~17% nhanh hơn Q-Learning |
+
+---
+
+## Môi trường chi tiết
+
+- **Observation:** flat `float32` vector, shape `(2N+1)²` — ví dụ 441 với N=10
+- **Actions:** `0=UP, 1=DOWN, 2=LEFT, 3=RIGHT`
+- **Reward:** `-1` mỗi bước, `+100` khi đến goal
+- **Terminated:** agent đến goal cell `(N-1, N-1)`
+- **Truncated:** vượt quá `N²×4` bước
+- **Maze:** Recursive Backtracker DFS — perfect maze (đúng 1 đường đi giữa 2 ô bất kỳ)

@@ -1,0 +1,92 @@
+[
+  {
+    "file": "maze_5x5_seed600.json",
+    "size": 5,
+    "seed": 600
+  },
+  {
+    "file": "maze_5x5_seed601.json",
+    "size": 5,
+    "seed": 601
+  },
+  {
+    "file": "maze_5x5_seed602.json",
+    "size": 5,
+    "seed": 602
+  },
+  {
+    "file": "maze_10x10_seed1100.json",
+    "size": 10,
+    "seed": 1100
+  },
+  {
+    "file": "maze_10x10_seed1101.json",
+    "size": 10,
+    "seed": 1101
+  },
+  {
+    "file": "maze_10x10_seed1102.json",
+    "size": 10,
+    "seed": 1102
+  },
+  {
+    "file": "maze_15x15_seed1600.json",
+    "size": 15,
+    "seed": 1600
+  },
+  {
+    "file": "maze_15x15_seed1601.json",
+    "size": 15,
+    "seed": 1601
+  },
+  {
+    "file": "maze_15x15_seed1602.json",
+    "size": 15,
+    "seed": 1602
+  },
+  {
+    "file": "maze_15x15_seed1700_loops.json",
+    "size": 15,
+    "seed": 1700
+  },
+  {
+    "file": "maze_15x15_seed1702_uniqueshortest.json",
+    "size": 15,
+    "seed": 1702
+  },
+  {
+    "file": "maze_10x10_seed1800_blockedgoal.json",
+    "size": 10,
+    "seed": 1800
+  },
+  {
+    "file": "maze_10x10_seed1103.json",
+    "size": 10,
+    "seed": 1103
+  },
+  {
+    "file": "maze_10x10_seed1104.json",
+    "size": 10,
+    "seed": 1104
+  },
+  {
+    "file": "maze_10x10_seed1105.json",
+    "size": 10,
+    "seed": 1105
+  },
+  {
+    "file": "maze_10x10_seed1106.json",
+    "size": 10,
+    "seed": 1106
+  },
+  {
+    "file": "maze_10x10_seed1107.json",
+    "size": 10,
+    "seed": 1107
+  },
+  {
+    "file": "maze_10x10_seed1108.json",
+    "size": 10,
+    "seed": 1108
+  }
+]
