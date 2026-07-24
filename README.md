@@ -49,8 +49,7 @@ reinforcement_learning_maze_solving/
 ## Cài đặt
 
 ```powershell
-cd "c:\Users\ADMIN\Documents\Kỳ 8 - AI\reinforcement_learning_maze_solving"
-pip install -r requirements.txt --no-cache-dir
+pip install -r requirements.txt
 ```
 
 **Packages chính:**
